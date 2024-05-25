@@ -71,12 +71,12 @@ public abstract class AbstractFarWorldRenderer <T extends Viewport> {
         this.models = new ModelManager(16);
     }
 
-    public void setupRender(Frustum frustum, Camera camera) {
+    public void setupRender(Frustum frustum, int cx, int cy, int cz) {
         this.frustum = frustum.frustumIntersection;
 
-        this.sx = camera.getBlockPos().getX() >> 5;
-        this.sy = camera.getBlockPos().getY() >> 5;
-        this.sz = camera.getBlockPos().getZ() >> 5;
+        this.sx = cx >> 5;
+        this.sy = cy >> 5;
+        this.sz = cz >> 5;
 
         //TODO: move this to a render function that is only called
         // once per frame when using multi viewport mods
