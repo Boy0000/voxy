@@ -135,15 +135,31 @@ public class VoxelCore {
         this.world.ingestService.enqueueIngest(worldChunk);
     }
 
+    private static int abyss_wy = -256;
+    private static int abyss_wh = 512;
+    private static int abyss_dx = 16384;
+    private static int abyss_dy = 480;
+    private static int abyss_overlap = 32;
+
     boolean firstTime = true;
     public void renderSetup(Frustum frustum, Camera camera) {
+        int x = camera.getBlockPos().getX();
+        int y = camera.getBlockPos().getY();
+        int z = camera.getBlockPos().getZ();
+
+        int section = (int)((double)x / 16384 + 0.5);
+        int _x = (int)(16384 * (((double)x / 16384 + 0.5) % 1 - 0.5));
+        int _y = y - section * 480;
+        x = _x;
+        y = _y;
+
         if (this.firstTime) {
-            this.distanceTracker.init(camera.getBlockPos().getX(), camera.getBlockPos().getZ());
+            this.distanceTracker.init(x, z);
             this.firstTime = false;
             //this.renderTracker.addLvl0(0,6,0);
         }
-        this.distanceTracker.setCenter(camera.getBlockPos().getX(), camera.getBlockPos().getY(), camera.getBlockPos().getZ());
-        this.renderer.setupRender(frustum, camera);
+        this.distanceTracker.setCenter(x, y, z);
+        this.renderer.setupRender(frustum, x, y, z);
     }
 
     private static Matrix4f makeProjectionMatrix(float near, float far) {
@@ -171,6 +187,13 @@ public class VoxelCore {
         if (IrisUtil.irisShadowActive()) {
             return;
         }
+
+        int section = (int)(cameraX / 16384 + 0.5);
+        double _x = 16384 * ((cameraX / 16384 + 0.5) % 1 - 0.5);
+        double _y = cameraY - section * 480;
+        cameraX = _x;
+        cameraY = _y;
+
         matrices.push();
         matrices.translate(-cameraX, -cameraY, -cameraZ);
         matrices.pop();
