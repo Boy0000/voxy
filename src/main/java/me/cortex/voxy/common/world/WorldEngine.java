@@ -41,9 +41,6 @@ public class WorldEngine {
     }
 
     private int unsafeLoadSection(WorldSection into) {
-        int rx = into.x << (5 + into.lvl);
-        if (rx < -8192 || rx >= 8192) return -1;
-
         var data = this.storage.getSectionData(into.key);
         if (data != null) {
             try {
