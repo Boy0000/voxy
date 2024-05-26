@@ -81,6 +81,7 @@ public class TranslocatingStorageAdaptor extends DelegatingStorageAdaptor {
                 return;
             }
         }
+        key = WorldEngine.newToOldId(key);
         super.setSectionData(key, data);
     }
 
@@ -93,6 +94,7 @@ public class TranslocatingStorageAdaptor extends DelegatingStorageAdaptor {
                 return;
             }
         }
+        key = WorldEngine.newToOldId(key);
         super.deleteSectionData(key);
     }
 
