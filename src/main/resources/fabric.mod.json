@@ -2,9 +2,10 @@
   "schemaVersion": 1,
   "id": "voxy",
   "version": "${version}",
-  "name": "Voxy",
+  "name": "Voxy: Mine in Abyss Edition",
   "description": "Far distance rendering mod utilising LoDs",
   "authors": [
+    "semyon422",
     "Cortex"
   ],
   "contact": {
