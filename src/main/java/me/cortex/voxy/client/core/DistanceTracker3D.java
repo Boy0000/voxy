@@ -7,6 +7,8 @@ import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import me.cortex.voxy.client.core.rendering.RenderTracker;
 import me.cortex.voxy.client.core.util.RingUtil;
 import net.minecraft.client.MinecraftClient;
+import java.util.HashMap;
+import java.util.Map;
 
 //Can use ring logic
 // i.e. when a player moves the rings of each lod change (how it was doing in the original attempt)
@@ -48,17 +50,17 @@ public class DistanceTracker3D {
 
             //TODO: FIXME: check that the level shift is right when inc/dec
             int capRing = i;
-            this.loDRings[i] = new TransitionRing2D((isTerminatingRing?5:6)+i, isTerminatingRing?scale<<1:scale, (x, z) -> {
+            this.loDRings[i] = new TransitionRing2D((isTerminatingRing?5:6)+i, isTerminatingRing?scale<<1:scale, (x, y, z) -> {
                 if (isTerminatingRing) {
-                    add(capRing, x, z);
+                    add(capRing, x, y, z);
                 } else
-                    this.dec(capRing+1, x, z);
-            }, (x, z) -> {
+                    this.dec(capRing+1, x, y, z);
+            }, (x, y, z) -> {
                 if (isTerminatingRing) {
-                    remove(capRing, x, z);
+                    remove(capRing, x, y, z);
                     //remove(capRing, (x<<1), (z<<1));
                 } else
-                    this.inc(capRing+1, x, z);
+                    this.inc(capRing+1, x, y, z);
             });
 
             if (isTerminatingRing) {
@@ -66,10 +68,10 @@ public class DistanceTracker3D {
             }
         }
         if (!wasRdClamped) {
-            this.mostOuterNonClampedRing = new TransitionRing2D(5+this.loDRings.length, Math.max(renderDistance, 2048)>>this.loDRings.length, (x,z)->
-                    add(this.loDRings.length, x, z), (x,z)->{
+            this.mostOuterNonClampedRing = new TransitionRing2D(5+this.loDRings.length, Math.max(renderDistance, 2048)>>this.loDRings.length, (x, y, z)->
+                    add(this.loDRings.length, x, y, z), (x, y, z)->{
                 if (renderDistance > 0) {
-                    remove(this.loDRings.length,x,z);
+                    remove(this.loDRings.length, x, y, z);
                 }
             });
         } else {
@@ -77,29 +79,21 @@ public class DistanceTracker3D {
         }
     }
 
-    private void inc(int lvl, int x, int z) {
-        for (int y = this.minYSection>>lvl; y <= this.maxYSection>>lvl; y++) {
-            this.tracker.inc(lvl, x, y, z);
-        }
+    private void inc(int lvl, int x, int y, int z) {
+        this.tracker.inc(lvl, x, y, z);
     }
 
-    private void dec(int lvl, int x, int z) {
-        for (int y = this.minYSection>>lvl; y <= this.maxYSection>>lvl; y++) {
-            this.tracker.dec(lvl, x, y, z);
-        }
+    private void dec(int lvl, int x, int y, int z) {
+        this.tracker.dec(lvl, x, y, z);
     }
 
-    private void add(int lvl, int x, int z) {
-        for (int y = this.minYSection>>lvl; y <= this.maxYSection>>lvl; y++) {
-            this.tracker.add(lvl, x, y, z);
-        }
+    private void add(int lvl, int x, int y, int z) {
+        this.tracker.add(lvl, x, y, z);
     }
 
-    private void remove(int lvl, int x, int z) {
-        for (int y = this.minYSection>>lvl; y <= this.maxYSection>>lvl; y++) {
-            this.tracker.remove(lvl, x, y, z);
-            this.tracker.removeCache(lvl, x, y, z);
-        }
+    private void remove(int lvl, int x, int y, int z) {
+        this.tracker.remove(lvl, x, y, z);
+        this.tracker.removeCache(lvl, x, y, z);
     }
 
     //How it works is there are N ring zones (one zone for each lod boundary)
@@ -111,63 +105,63 @@ public class DistanceTracker3D {
     public void setCenter(int x, int y, int z) {
         for (var ring : this.cacheLoadRings) {
             if (ring!=null)
-                ring.update(x, z);
+                ring.update(x, y, z);
         }
         if (this.mostOuterNonClampedRing!=null)
-            this.mostOuterNonClampedRing.update(x, z);
+            this.mostOuterNonClampedRing.update(x, y, z);
 
         //Update in reverse order (biggest lod to smallest lod)
         for (int i = this.loDRings.length-1; -1<i; i-- ) {
             var ring = this.loDRings[i];
             if (ring != null)
-                ring.update(x, z);
+                ring.update(x, y, z);
         }
         for (var ring : this.cacheUnloadRings) {
             if (ring!=null)
-                ring.update(x, z);
+                ring.update(x, y, z);
         }
     }
 
-    public void init(int x, int z) {
+    public void init(int x, int y, int z) {
         for (var ring : this.cacheLoadRings) {
             if (ring != null)
-                ring.setCenter(x, z);
+                ring.setCenter(x, y, z);
         }
 
         for (var ring : this.cacheUnloadRings) {
             if (ring != null)
-                ring.setCenter(x, z);
+                ring.setCenter(x, y, z);
         }
 
         for (var ring : this.loDRings) {
             if (ring != null)
-                ring.setCenter(x, z);
+                ring.setCenter(x, y, z);
         }
         if (this.mostOuterNonClampedRing!=null)
-            this.mostOuterNonClampedRing.setCenter(x, z);
+            this.mostOuterNonClampedRing.setCenter(x, y, z);
 
         var thread = new Thread(()-> {
             for (var ring : this.cacheLoadRings) {
                 if (ring != null)
-                    ring.fill(x, z);
+                    ring.fill(x, y, z);
             }
 
             for (var ring : this.cacheUnloadRings) {
                 if (ring != null)
-                    ring.fill(x, z);
+                    ring.fill(x, y, z);
             }
 
             //This is an ungodly terrible hack to make the lods load in a semi ok order
             for (var ring : this.loDRings)
                 if (ring != null)
-                    ring.fill(x, z);
+                    ring.fill(x, y, z);
 
             if (this.mostOuterNonClampedRing!=null)
-                this.mostOuterNonClampedRing.fill(x, z);
+                this.mostOuterNonClampedRing.fill(x, y, z);
 
             for (int i = this.loDRings.length - 1; 0 <= i; i--) {
                 if (this.loDRings[i] != null) {
-                    this.loDRings[i].fill(x, z);
+                    this.loDRings[i].fill(x, y, z);
                 }
             }
         });
@@ -183,7 +177,7 @@ public class DistanceTracker3D {
 
 
     private interface Transition2DCallback {
-        void callback(int x, int z);
+        void callback(int x, int y, int z);
     }
     private static final class TransitionRing2D {
         private final int triggerRangeSquared;
@@ -193,9 +187,11 @@ public class DistanceTracker3D {
         private final int radius;
 
         private int lastUpdateX;
+        private int lastUpdateY;
         private int lastUpdateZ;
 
         private int currentX;
+        private int currentY;
         private int currentZ;
 
         //Note radius is in shiftScale
@@ -211,14 +207,36 @@ public class DistanceTracker3D {
             this.radius = radius;
         }
 
-        private long Prel(int x, int z) {
-            return (Integer.toUnsignedLong(this.currentZ + z)<<32)|Integer.toUnsignedLong(this.currentX + x);
+        // https://stackoverflow.com/questions/29566711/how-to-compose-a-key-for-a-hashmap-from-3-integers
+        private static final class PrelKey{
+            int a, b, c;
+            public PrelKey(int a, int b, int c) {
+                this.a = a;
+                this.b = b;
+                this.c = c;
+            }
+       
+            public int hashCode() {
+                return (a << 10 ^ b << 5 ^ c);
+            }
+       
+            public boolean equals(Object o) {
+                if(!(o instanceof PrelKey)) return false;
+                PrelKey k = (PrelKey) o;
+                return (k.a == a && k.b == b && k.c == c);
+            }
+       }
+
+        private PrelKey Prel(int x, int y, int z) {
+            // return (Integer.toUnsignedLong(this.currentZ + z)<<32)|Integer.toUnsignedLong(this.currentX + x);
+            return new PrelKey(this.currentX + x, this.currentY + y, this.currentZ + z);
         }
 
-        public void update(int x, int z) {
+        public void update(int x, int y, int z) {
             long dx = this.lastUpdateX - x;
+            long dy = this.lastUpdateY - y;
             long dz = this.lastUpdateZ - z;
-            long distSquared =  dx*dx + dz*dz;
+            long distSquared =  dx*dx + dy*dy + dz*dz;
             if (distSquared < this.triggerRangeSquared) {
                 return;
             }
@@ -226,107 +244,111 @@ public class DistanceTracker3D {
             //Update the last update position
             int maxStep = this.triggerRangeSquared/2;
             this.lastUpdateX += Math.min(maxStep,Math.max(-maxStep, x-this.lastUpdateX));
+            this.lastUpdateY += Math.min(maxStep,Math.max(-maxStep, y-this.lastUpdateY));
             this.lastUpdateZ += Math.min(maxStep,Math.max(-maxStep, z-this.lastUpdateZ));
 
             //Compute movement if it happened
             int nx = x>>this.shiftSize;
+            int ny = y>>this.shiftSize;
             int nz = z>>this.shiftSize;
 
-            if (nx == this.currentX && nz == this.currentZ) {
+            if (nx == this.currentX && ny == this.currentY && nz == this.currentZ) {
                 //No movement
                 return;
             }
 
+            // System.out.println("xyz " + this.currentX + " -> " + nx + ", " + this.currentY + " -> " + ny + ", " + this.currentZ + " -> " + nz + ", ");
+
 
             //FIXME: not right, needs to only call load/unload on entry and exit, cause atm its acting like a loaded circle
 
-            Long2IntOpenHashMap ops = new Long2IntOpenHashMap();
+            // Long2IntOpenHashMap ops = new Long2IntOpenHashMap();
+            Map<PrelKey, Integer> ops = new HashMap<>();
             while (true) {
                 int dir = nz < this.currentZ ? -1 : 1;
                 if (nz != this.currentZ) {
-                    for (int i = 0; i <= this.radius; i++) {
-                        int cx = i;
-                        int cz = this.radius;
-
-                        ops.addTo(Prel(cx, cz + Math.max(0, dir)), dir);
-                        ops.addTo(Prel(cx, -cz + Math.min(0, dir)), -dir);
-                        if (cx != 0) {
-                            ops.addTo(Prel(-cx, cz + Math.max(0, dir)), dir);
-                            ops.addTo(Prel(-cx, -cz + Math.min(0, dir)), -dir);
+                    for (int cx = -this.radius; cx <= this.radius; cx++) {
+                        for (int cy = -this.radius; cy <= this.radius; cy++) {
+                            int cz = this.radius;
+                            ops.put(Prel(cx, cy, cz + Math.max(0, dir)), dir);
+                            ops.put(Prel(cx, cy, -cz + Math.min(0, dir)), -dir);
                         }
                     }
-
                     this.currentZ += dir;
+                }
+
+                dir = ny < this.currentY ? -1 : 1;
+                if (ny != this.currentY) {
+                    for (int cz = -this.radius; cz <= this.radius; cz++) {
+                        for (int cx = -this.radius; cx <= this.radius; cx++) {
+                            int cy = this.radius;
+                            ops.put(Prel(cx, cy + Math.max(0, dir), cz), dir);
+                            ops.put(Prel(cx, -cy + Math.min(0, dir), cz), -dir);
+                        }
+                    }
+                    this.currentY += dir;
                 }
 
                 dir = nx < this.currentX ? -1 : 1;
                 if (nx != this.currentX) {
-                    for (int i = 0; i <= this.radius; i++) {
-                        int cx = this.radius;
-                        int cz = i;
-
-                        ops.addTo(Prel(cx + Math.max(0, dir), cz), dir);
-                        ops.addTo(Prel(-cx + Math.min(0, dir), cz), -dir);
-                        if (cz != 0) {
-                            ops.addTo(Prel(cx + Math.max(0, dir), -cz), dir);
-                            ops.addTo(Prel(-cx + Math.min(0, dir), -cz), -dir);
+                    for (int cz = -this.radius; cz <= this.radius; cz++) {
+                        for (int cy = -this.radius; cy <= this.radius; cy++) {
+                            int cx = this.radius;
+                            ops.put(Prel(cx + Math.max(0, dir), cy, cz), dir);
+                            ops.put(Prel(-cx + Math.min(0, dir), cy, cz), -dir);
                         }
                     }
-
                     this.currentX += dir;
                 }
 
                 //Only break once the coords match
-                if (nx == this.currentX && nz == this.currentZ) {
+                if (nx == this.currentX && ny == this.currentY && nz == this.currentZ) {
                     break;
                 }
             }
 
 
-            ops.forEach((pos,val)->{
+            ops.forEach((pos, val)->{
                 if (val > 0) {
-                    this.enter.callback((int) (long)pos, (int) (pos>>32));
+                    // System.out.println("enter " + pos.a + " " + pos.b + " " + pos.c);
+                    this.enter.callback(pos.a, pos.b, pos.c);
                 }
                 if (val < 0) {
-                    this.exit.callback((int) (long)pos, (int) (pos>>32));
+                    // System.out.println("exit " + pos.a + " " + pos.b + " " + pos.c);
+                    this.exit.callback(pos.a, pos.b, pos.c);
                 }
             });
             ops.clear();
         }
 
-        public void fill(int x, int z) {
-            this.fill(x, z, null);
+        public void fill(int x, int y, int z) {
+            this.fill(x, y, z, null);
         }
 
-        public void fill(int x, int z, Transition2DCallback outsideCallback) {
+        public void fill(int x, int y, int z, Transition2DCallback outsideCallback) {
             int cx = x>>this.shiftSize;
+            int cy = y>>this.shiftSize;
             int cz = z>>this.shiftSize;
 
             int r2 = this.radius*this.radius;
             for (int a = -this.radius; a <= this.radius; a++) {
-            //IntStream.range(-this.radius, this.radius+1).parallel().forEach(a->{
-                int b = (int) Math.floor(Math.sqrt(r2-(a*a)));
-                for (int c = -b; c <= b; c++) {
-                    this.enter.callback(a + cx, c + cz);
-                }
-                if (outsideCallback != null) {
-                    for (int c = -this.radius; c < -b; c++) {
-                        outsideCallback.callback(a + cx, c + cz);
-                    }
-
-                    for (int c = b+1; c <= this.radius; c++) {
-                        outsideCallback.callback(a + cx, c + cz);
+                for (int b = -this.radius; b <= this.radius; b++) {
+                    for (int c = -this.radius; c <= this.radius; c++) {
+                        this.enter.callback(a + cx, b + cy, c + cz);
                     }
                 }
-            }//);
+            }
         }
 
-        public void setCenter(int x, int z) {
+        public void setCenter(int x, int y, int z) {
             int cx = x>>this.shiftSize;
+            int cy = y>>this.shiftSize;
             int cz = z>>this.shiftSize;
             this.currentX = cx;
+            this.currentY = cy;
             this.currentZ = cz;
             this.lastUpdateX = x + (((int)(Math.random()*4))<<(this.shiftSize-4));
+            this.lastUpdateY = y + (((int)(Math.random()*4))<<(this.shiftSize-4));
             this.lastUpdateZ = z + (((int)(Math.random()*4))<<(this.shiftSize-4));
         }
     }

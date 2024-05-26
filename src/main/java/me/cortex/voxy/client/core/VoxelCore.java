@@ -153,7 +153,7 @@ public class VoxelCore {
         y = _y;
 
         if (this.firstTime) {
-            this.distanceTracker.init(x, z);
+            this.distanceTracker.init(x, y, z);
             this.firstTime = false;
             //this.renderTracker.addLvl0(0,6,0);
         }
