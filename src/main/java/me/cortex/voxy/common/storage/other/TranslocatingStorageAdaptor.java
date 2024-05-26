@@ -31,7 +31,7 @@ public class TranslocatingStorageAdaptor extends DelegatingStorageAdaptor {
                   (this.z1>>lvl) <= z && z <= (this.z2>>lvl))) {
                 return -1;
             }
-            return WorldEngine.getWorldSectionId(lvl,
+            return WorldEngine.getWorldSectionIdOld(lvl,
                     x + (this.dx>>lvl),
                     y + (this.dy>>lvl),
                     z + (this.dz>>lvl)
@@ -68,6 +68,7 @@ public class TranslocatingStorageAdaptor extends DelegatingStorageAdaptor {
                 }
             }
         }
+        key = WorldEngine.newToOldId(key);
         return super.getSectionData(key);
     }
 

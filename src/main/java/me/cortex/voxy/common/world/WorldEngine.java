@@ -75,12 +75,30 @@ public class WorldEngine {
         return this.sectionTracker.acquire(lvl, x, y, z, false);
     }
 
+    //TODO: Fixme/optimize, cause as the lvl gets higher, the size of x,y,z gets smaller so i can dynamically compact the format
+    // depending on the lvl, which should optimize colisions and whatnot
+    public static long getWorldSectionIdOld(int lvl, int x, int y, int z) {
+        // llll yyyy yyyy zzzz zzzz zzzz zzzz zzzz _ zzzz xxxx xxxx xxxx xxxx xxxx xxxx xxxx
+        return ((long)lvl<<60)|
+        ((long)(y&0xFF)<<52)|
+        ((long)(z&((1<<24)-1))<<28)|
+        ((long)(x&((1<<24)-1))<<4);//NOTE: 4 bits spare for whatever
+    }
+
     public static long getWorldSectionId(int lvl, int x, int y, int z) {
         // llll zzzz zzzz zzzz zzzz zzzz yyyy yyyy _ yyyy yyyy yyyy xxxx xxxx xxxx xxxx xxxx
         return ((long)lvl<<60)|
         ((long)(z & ((1 << 20) - 1)) << 40)|
         ((long)(y & ((1 << 20) - 1)) << 20)|
         ((long)(x & ((1 << 20) - 1)));
+    }
+
+    public static long oldToNewId(long id) {
+        return getWorldSectionId(getLevel(id), getXOld(id), getYOld(id), getZOld(id));
+    }
+
+    public static long newToOldId(long id) {
+        return getWorldSectionIdOld(getLevel(id), getX(id), getY(id), getZ(id));
     }
 
     public static int getLevel(long id) {
@@ -97,6 +115,18 @@ public class WorldEngine {
 
     public static int getZ(long id) {
         return (int) ((id << 4) >> 44);
+    }
+    
+    public static int getXOld(long id) {
+        return (int) ((id<<36)>>40);
+    }
+
+    public static int getYOld(long id) {
+        return (int) ((id<<4)>>56);
+    }
+
+    public static int getZOld(long id) {
+        return (int) ((id<<12)>>40);
     }
 
     //Marks a section as dirty, enqueuing it for saving and or render data rebuilding
