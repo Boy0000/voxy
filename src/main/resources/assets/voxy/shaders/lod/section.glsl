@@ -4,12 +4,9 @@ uint extractDetail(SectionMeta section) {
 }
 
 ivec3 extractPosition(SectionMeta section) {
-    int y = ((int(section.posA)<<4)>>24);
-    int x = (int(section.posB)<<4)>>8;
-    int z = int((section.posA&((1<<20)-1))<<4);
-    z |= int(section.posB>>28);
-    z <<= 8;
-    z >>= 8;
+    int y = ((int(section.posA) << 24) >> 12) | ((int(section.posB) >> 20) & ((1 << 20) - 1));
+    int x = (int(section.posB) << 12) >> 12;
+    int z = ((int(section.posA) << 4) >> 12);
     return ivec3(x,y,z);
 }
 

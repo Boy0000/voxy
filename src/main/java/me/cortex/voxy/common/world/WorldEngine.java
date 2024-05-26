@@ -41,6 +41,9 @@ public class WorldEngine {
     }
 
     private int unsafeLoadSection(WorldSection into) {
+        int rx = into.x << (5 + into.lvl);
+        if (rx < -8192 || rx >= 8192) return -1;
+
         var data = this.storage.getSectionData(into.key);
         if (data != null) {
             try {
@@ -72,27 +75,28 @@ public class WorldEngine {
         return this.sectionTracker.acquire(lvl, x, y, z, false);
     }
 
-    //TODO: Fixme/optimize, cause as the lvl gets higher, the size of x,y,z gets smaller so i can dynamically compact the format
-    // depending on the lvl, which should optimize colisions and whatnot
     public static long getWorldSectionId(int lvl, int x, int y, int z) {
-        return ((long)lvl<<60)|((long)(y&0xFF)<<52)|((long)(z&((1<<24)-1))<<28)|((long)(x&((1<<24)-1))<<4);//NOTE: 4 bits spare for whatever
+        // llll zzzz zzzz zzzz zzzz zzzz yyyy yyyy _ yyyy yyyy yyyy xxxx xxxx xxxx xxxx xxxx
+        return ((long)lvl<<60)|
+        ((long)(z & ((1 << 20) - 1)) << 40)|
+        ((long)(y & ((1 << 20) - 1)) << 20)|
+        ((long)(x & ((1 << 20) - 1)));
     }
 
     public static int getLevel(long id) {
-        return (int) ((id>>60)&0xf);
+        return (int) ((id >> 60) & 0xf);
     }
 
-    //TODO: check these shifts are correct for all the gets
     public static int getX(long id) {
-        return (int) ((id<<36)>>40);
+        return (int) ((id << 44) >> 44);
     }
 
     public static int getY(long id) {
-        return (int) ((id<<4)>>56);
+        return (int) ((id << 24) >> 44);
     }
 
     public static int getZ(long id) {
-        return (int) ((id<<12)>>40);
+        return (int) ((id << 4) >> 44);
     }
 
     //Marks a section as dirty, enqueuing it for saving and or render data rebuilding
