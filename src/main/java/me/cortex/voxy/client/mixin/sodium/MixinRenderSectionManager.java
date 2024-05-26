@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinRenderSectionManager {
     @Shadow @Final private ClientWorld world;
 
-    @Inject(method = "onChunkRemoved", at = @At("HEAD"))
+    @Inject(method = "onChunkAdded", at = @At("HEAD"))
     private void injectIngest(int x, int z, CallbackInfo ci) {
         var core = ((IGetVoxelCore)(world.worldRenderer)).getVoxelCore();
         if (core != null && VoxyConfig.CONFIG.ingestEnabled) {
