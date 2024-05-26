@@ -50,7 +50,7 @@ import static org.lwjgl.opengl.GL30C.GL_FRAMEBUFFER;
 //Ingest -> world engine -> raw render data -> render data
 public class VoxelCore {
     private final WorldEngine world;
-    private final DistanceTracker distanceTracker;
+    private final DistanceTracker3D distanceTracker;
     private final RenderGenerationService renderGen;
     private final RenderTracker renderTracker;
 
@@ -97,9 +97,8 @@ public class VoxelCore {
             maxY = cfg.maxYOverride;
         }
 
-        this.distanceTracker = new DistanceTracker(this.renderTracker, new int[]{q,q,q,q},
-                (VoxyConfig.CONFIG.renderDistance<0?VoxyConfig.CONFIG.renderDistance:((VoxyConfig.CONFIG.renderDistance+1)/2)),
-                3, minY, maxY);
+        this.distanceTracker = new DistanceTracker3D(this.renderTracker, new int[]{q,q,q,q},
+                (VoxyConfig.CONFIG.renderDistance<0?VoxyConfig.CONFIG.renderDistance:((VoxyConfig.CONFIG.renderDistance+1)/2)));
         System.out.println("Distance tracker initialized");
 
         this.postProcessing = new PostProcessing();
