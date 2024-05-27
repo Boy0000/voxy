@@ -9,6 +9,8 @@ import me.cortex.voxy.client.core.rendering.building.RenderGenerationService;
 import me.cortex.voxy.client.core.rendering.post.PostProcessing;
 import me.cortex.voxy.client.core.util.DebugUtil;
 import me.cortex.voxy.client.core.util.IrisUtil;
+import me.cortex.voxy.client.core.util.AbyssUtil;
+import me.cortex.voxy.client.core.util.AbyssUtil.Coords;
 import me.cortex.voxy.client.saver.ContextSelectionSystem;
 import me.cortex.voxy.common.world.WorldEngine;
 import me.cortex.voxy.client.importers.WorldImporter;
@@ -130,23 +132,15 @@ public class VoxelCore {
         this.world.ingestService.enqueueIngest(worldChunk);
     }
 
-    private static int abyss_wy = -256;
-    private static int abyss_wh = 512;
-    private static int abyss_dx = 16384;
-    private static int abyss_dy = 480;
-    private static int abyss_overlap = 32;
-
     boolean firstTime = true;
     public void renderSetup(Frustum frustum, Camera camera) {
         int x = camera.getBlockPos().getX();
         int y = camera.getBlockPos().getY();
         int z = camera.getBlockPos().getZ();
 
-        int section = (int)((double)x / 16384 + 0.5);
-        int _x = (int)(16384 * (((double)x / 16384 + 0.5) % 1 - 0.5));
-        int _y = y - section * 480;
-        x = _x;
-        y = _y;
+        Coords abyssCoords = AbyssUtil.toAbyss(x, y);
+        x = (int)abyssCoords.x;
+        y = (int)abyssCoords.y;
 
         if (this.firstTime) {
             this.distanceTracker.init(x, y, z);
@@ -183,11 +177,9 @@ public class VoxelCore {
             return;
         }
 
-        int section = (int)(cameraX / 16384 + 0.5);
-        double _x = 16384 * ((cameraX / 16384 + 0.5) % 1 - 0.5);
-        double _y = cameraY - section * 480;
-        cameraX = _x;
-        cameraY = _y;
+        Coords abyssCoords = AbyssUtil.toAbyss(cameraX, cameraY);
+        cameraX = abyssCoords.x;
+        cameraY = abyssCoords.y;
 
         matrices.push();
         matrices.translate(-cameraX, -cameraY, -cameraZ);
@@ -220,6 +212,24 @@ public class VoxelCore {
 
         this.postProcessing.renderPost(projection, RenderSystem.getProjectionMatrix(), boundFB);
 
+    }
+
+    public void addDebugInfoLeft(List<String> debug) {
+        var client = MinecraftClient.getInstance();
+        var camera = client.gameRenderer.getCamera();
+        
+        int x = camera.getBlockPos().getX();
+        int y = camera.getBlockPos().getY();
+        int z = camera.getBlockPos().getZ();
+
+        int section = AbyssUtil.getSection(x);
+        String sectionName = AbyssUtil.getSectionName(section);
+
+        Coords abyssCoords = AbyssUtil.toAbyss(x, y);
+        x = (int)abyssCoords.x;
+        y = (int)abyssCoords.y;
+
+        debug.add(10, "Abyss: " + x + " " + y + " " + z + " [" + sectionName + "]");
     }
 
     public void addDebugInfo(List<String> debug) {
