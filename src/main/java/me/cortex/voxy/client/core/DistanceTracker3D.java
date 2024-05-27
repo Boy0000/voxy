@@ -21,8 +21,6 @@ public class DistanceTracker3D {
     private final TransitionRing2D[] cacheUnloadRings;
     private final TransitionRing2D mostOuterNonClampedRing;
     private final RenderTracker tracker;
-    private final int minYSection;
-    private final int maxYSection;
     private final int renderDistance;
 
     public DistanceTracker3D(RenderTracker tracker, int[] lodRingScales, int renderDistance) {
@@ -30,10 +28,7 @@ public class DistanceTracker3D {
         this.cacheLoadRings = new TransitionRing2D[lodRingScales.length];
         this.cacheUnloadRings = new TransitionRing2D[lodRingScales.length];
         this.tracker = tracker;
-        this.minYSection = -256;
-        this.maxYSection = 256;
         this.renderDistance = renderDistance;
-
 
         boolean wasRdClamped = false;
         //The rings 0+ start at 64 vanilla rd, no matter what the game is set at, that is if the game is set to 32 rd
