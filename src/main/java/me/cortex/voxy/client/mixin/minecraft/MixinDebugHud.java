@@ -20,4 +20,12 @@ public class MixinDebugHud {
             core.addDebugInfo(ret);
         }
     }
+    @Inject(method = "getLeftText", at = @At("TAIL"))
+    private void injectDebugLeft(CallbackInfoReturnable<List<String>> cir) {
+        var ret = cir.getReturnValue();
+        var core = ((IGetVoxelCore) MinecraftClient.getInstance().worldRenderer).getVoxelCore();
+        if (core != null) {
+            core.addDebugInfoLeft(ret);
+        }
+    }
 }
