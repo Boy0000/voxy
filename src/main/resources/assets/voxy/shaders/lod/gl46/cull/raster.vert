@@ -3,6 +3,7 @@
 #define VISIBILITY_ACCESS writeonly
 #import <voxy:lod/gl46/bindings.glsl>
 #import <voxy:lod/section.glsl>
+#import <voxy:lod/abyss.glsl>
 
 flat out uint id;
 flat out uint value;
@@ -22,7 +23,10 @@ void main() {
     pos += (aabbOffset-1)*(1<<detail);
     pos += (ivec3(gl_VertexID&1, (gl_VertexID>>2)&1, (gl_VertexID>>1)&1)*(size+2))*(1<<detail);
 
-    gl_Position = MVP * vec4(vec3(pos),1);
+    vec3 fpos = vec3(pos);
+    fpos = abyss_offset(fpos, detail, ipos.y);
+
+    gl_Position = MVP * vec4(vec3(fpos),1);
 
     //Write to this id
     id = sid;

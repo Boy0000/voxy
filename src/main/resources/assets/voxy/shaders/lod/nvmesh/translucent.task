@@ -10,6 +10,7 @@
 
 #import <voxy:lod/nvmesh/bindings.glsl>
 #import <voxy:lod/section.glsl>
+#import <voxy:lod/abyss.glsl>
 #line 12
 
 #define MESH_WORKLOAD_PER_INVOCATION 16
@@ -37,7 +38,11 @@ void main() {
     //Relative position to camera with resepct to lod level to check for visibility bits
     ivec3 cpos = lodPos-(baseSectionPos>>lodLvl);
     //Relative position to camera
-    task.origin = vec3(((lodPos<<lodLvl)-baseSectionPos)<<5)-cameraSubPos;
+
+    vec3 dpos = vec3(((lodPos<<lodLvl)-baseSectionPos)<<5);
+    dpos = abyss_offset(dpos, lodLvl, lodPos.y);
+
+    task.origin = dpos-cameraSubPos;
 
     task.baseOffset = extractQuadStart(meta);
     task.meta = lodLvl&0xFu;
