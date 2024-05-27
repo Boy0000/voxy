@@ -4,6 +4,7 @@
 #import <voxy:lod/quad_format.glsl>
 #import <voxy:lod/gl46/bindings.glsl>
 #import <voxy:lod/block_model.glsl>
+#import <voxy:lod/abyss.glsl>
 #line 8
 
 layout(location = 0) out vec2 uv;
@@ -142,5 +143,8 @@ void main() {
 
 
     vec3 origin = vec3(((extractRelativeLodPos()<<lodLevel) - (baseSectionPos&(ivec3((1<<lodLevel)-1))))<<5);
-    gl_Position = MVP*vec4((cornerPos+swizzelDataAxis(face>>1,vec3(cQuadSize,0)))*(1<<lodLevel)+origin, 1.0);
+    vec3 fpos = vec3((cornerPos+swizzelDataAxis(face>>1,vec3(cQuadSize,0)))*(1<<lodLevel)+origin);
+    fpos = abyss_offset(fpos, lodLevel, extractRelativeLodPos().y + (baseSectionPos >> lodLevel).y);
+
+    gl_Position = MVP*vec4(fpos, 1.0);
 }
