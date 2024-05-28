@@ -56,13 +56,13 @@ void main() {
     uint lodLvl = extractDetail(meta);
     ivec3 lodPos= extractPosition(meta);
     //Relative position to camera with resepct to lod level to check for visibility bits
-    ivec3 cpos = lodPos-(baseSectionPos>>lodLvl);
+
+    ivec3 bsp = abyss_offset32(baseSectionPos, lodLvl, lodPos.y);
+
+    ivec3 cpos = lodPos-(bsp>>lodLvl);
     //Relative position to camera
 
-    vec3 dpos = vec3(((lodPos<<lodLvl)-baseSectionPos)<<5);
-    dpos = abyss_offset(dpos, lodLvl, lodPos.y);
-
-    task.origin = dpos-cameraSubPos;
+    task.origin = vec3(((lodPos<<lodLvl)-bsp)<<5)-cameraSubPos;
 
     task.baseOffset = extractQuadStart(meta);
     task.meta = lodLvl&0xFu;

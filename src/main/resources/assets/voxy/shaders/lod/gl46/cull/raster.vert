@@ -18,15 +18,14 @@ void main() {
     ivec3 aabbOffset = extractAABBOffset(section);
     ivec3 size = extractAABBSize(section);
 
+    ivec3 bsp = abyss_offset32(baseSectionPos, detail, ipos.y);
+
     //Transform ipos with respect to the vertex corner
-    ivec3 pos = (((ipos<<detail)-baseSectionPos)<<5);
+    ivec3 pos = (((ipos<<detail)-bsp)<<5);
     pos += (aabbOffset-1)*(1<<detail);
     pos += (ivec3(gl_VertexID&1, (gl_VertexID>>2)&1, (gl_VertexID>>1)&1)*(size+2))*(1<<detail);
 
-    vec3 fpos = vec3(pos);
-    fpos = abyss_offset(fpos, detail, ipos.y);
-
-    gl_Position = MVP * vec4(vec3(fpos),1);
+    gl_Position = MVP * vec4(vec3(pos),1);
 
     //Write to this id
     id = sid;
