@@ -6,6 +6,7 @@ import me.cortex.voxy.common.world.other.Mapper;
 import me.cortex.voxy.common.world.service.SectionSavingService;
 import me.cortex.voxy.common.world.service.VoxelIngestService;
 import me.cortex.voxy.common.storage.StorageBackend;
+import me.cortex.voxy.common.storage.other.AbyssStorageAdaptor;
 import org.lwjgl.system.MemoryUtil;
 
 import java.util.Arrays;
@@ -31,7 +32,7 @@ public class WorldEngine {
 
     public WorldEngine(StorageBackend storageBackend, int ingestWorkers, int savingServiceWorkers, int maxMipLayers) {
         this.maxMipLevels = maxMipLayers;
-        this.storage = storageBackend;
+        this.storage = new AbyssStorageAdaptor(storageBackend);
         this.mapper = new Mapper(this.storage);
         //4 cache size bits means that the section tracker has 16 separate maps that it uses
         this.sectionTracker = new ActiveSectionTracker(3, this::unsafeLoadSection);
