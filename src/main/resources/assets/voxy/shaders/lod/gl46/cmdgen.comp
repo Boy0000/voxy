@@ -7,6 +7,7 @@ layout(local_size_x = 128) in;
 #import <voxy:lod/gl46/bindings.glsl>
 #import <voxy:lod/gl46/frustum.glsl>
 #import <voxy:lod/section.glsl>
+#import <voxy:lod/abyss.glsl>
 #line 11
 
 //https://github.com/KhronosGroup/GLSL/blob/master/extensions/ext/GL_EXT_shader_16bit_storage.txt
@@ -47,7 +48,9 @@ void main() {
     uint detail = extractDetail(meta);
     ivec3 ipos = extractPosition(meta);
 
-    vec3 cornerPos = vec3(((ipos<<detail)-baseSectionPos)<<5)-cameraSubPos;
+    ivec3 bsp = abyss_offset32(baseSectionPos, detail, ipos.y);
+
+    vec3 cornerPos = vec3(((ipos<<detail)-bsp)<<5)-cameraSubPos;
 
 
     //Check the occlusion data from last frame
@@ -61,13 +64,14 @@ void main() {
 
     //This prevents overflow of the relative position encoder
     if (shouldRender) {
-        shouldRender = !any(lessThan(ivec3(254), abs(ipos-(baseSectionPos>>detail))));
+        shouldRender = !any(lessThan(ivec3(254), abs(ipos-(bsp>>detail))));
     }
 
     if (shouldRender) {
         uint encodedPos = encodeLocalLodPos(detail, ipos);
         uint ptr = extractQuadStart(meta);
-        ivec3 relative = ipos-(baseSectionPos>>detail);
+
+        ivec3 relative = ipos-(bsp>>detail);
 
 
 
