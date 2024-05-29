@@ -17,7 +17,7 @@ layout(location = 4) out flat uint flags;
 layout(location = 5) out flat vec4 conditionalTinting;
 
 #ifdef DEBUG_RENDER
-layout(location = 6) out flat uint quadDebug;
+layout(location = 6) out flat uint abyss_flags;
 #endif
 
 uint extractLodLevel() {
@@ -143,13 +143,24 @@ void main() {
     uv = faceSize.xz + cQuadSize;
 
     vec3 cornerPos = extractPos(quad);
+    int corner_y = int(cornerPos.y);
+
     float depthOffset = extractFaceIndentation(faceData);
     cornerPos += swizzelDataAxis(face>>1, vec3(faceSize.xz, mix(depthOffset, 1-depthOffset, float(face&1u))));
 
 
     vec3 origin = vec3(((extractRelativeLodPos()<<lodLevel) - (baseSectionPos&(ivec3((1<<lodLevel)-1))))<<5);
     vec3 fpos = vec3((cornerPos+swizzelDataAxis(face>>1,vec3(cQuadSize,0)))*(1<<lodLevel)+origin);
-    fpos = abyss_offset(fpos, lodLevel, extractRelativeLodPos().y + (baseSectionPos >> lodLevel).y);
+
+    int lod_y = extractRelativeLodPos().y + (baseSectionPos >> lodLevel).y;
+    int sec = abyss_section(lodLevel, lod_y);
+    fpos.y += 32 * sec;
+
+    if ((sec != abyss_section(lodLevel, lod_y + 1)) && ((corner_y - (32 - (32 >> lodLevel))) >= 0)) {
+        abyss_flags |= 1u;  // discard
+    } else {
+        abyss_flags = 0;
+    }
 
     gl_Position = MVP*vec4(fpos, 1.0);
 

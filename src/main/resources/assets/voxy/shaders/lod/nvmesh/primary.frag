@@ -11,10 +11,15 @@ layout(location=2) perprimitiveNV in PerPrimData {
     vec4 addin;
     uint flags;
     vec4 conditionalTinting;
+    uint abyss_flags;
 };
 
 layout(location = 0) out vec4 outColour;
 void main() {
+    if ((abyss_flags & 1u) == 1) {
+        discard;
+    }
+
     vec2 uv = mod(uv, vec2(1.0))*(1.0/(vec2(3.0,2.0)*256.0));
     vec4 colour = texture(blockModelAtlas, uv + baseUV, ((flags>>1)&1u)*-4.0);
     if ((flags&1u) == 1 && colour.a <= 0.25f) {

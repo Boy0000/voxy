@@ -48,7 +48,8 @@ void main() {
     uint detail = extractDetail(meta);
     ivec3 ipos = extractPosition(meta);
 
-    ivec3 bsp = abyss_offset32(baseSectionPos, detail, ipos.y);
+    ivec3 bsp = ivec3(baseSectionPos);
+    bsp.y -= abyss_section(detail, ipos.y);
 
     vec3 cornerPos = vec3(((ipos<<detail)-bsp)<<5)-cameraSubPos;
 
