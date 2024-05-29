@@ -11,6 +11,7 @@
 #import <voxy:lod/nvmesh/bindings.glsl>
 #import <voxy:lod/block_model.glsl>
 #import <voxy:lod/quad_format.glsl>
+#import <voxy:lod/abyss.glsl>
 #line 13
 
 layout(local_size_x = 16) in;
@@ -26,6 +27,7 @@ layout(location=2) perprimitiveNV out PerPrimData {
     vec4 addin;
     uint flags;
     vec4 conditionalTinting;
+    uint abyss_flags;
 } per_prim_out[];
 
 void emitIndicies() {
@@ -82,6 +84,7 @@ taskNV in Task {
     uvec4 binVb;
 
     uint meta;//First 4 bits is lod level, remaining is quadCount
+    int lod_y;
 };
 
 uint getQuadIndex() {
@@ -223,6 +226,8 @@ void main() {
 
     //Corner position of quad relative to section corner (in 0->32 scale)
     vec3 cornerPos = extractPos(quad);
+    int corner_y = int(cornerPos.y);
+
     float depthOffset = extractFaceIndentation(faceData);
     cornerPos += swizzelDataAxis(face>>1, vec3(faceSize.xz, mix(depthOffset, 1-depthOffset, float(face&1u))));
     gl_MeshVerticesNV[V|0].gl_Position = MVP*vec4(cornerPos*lodScale+origin, 1.0);
@@ -233,5 +238,14 @@ void main() {
     if (gl_LocalInvocationID.x == 0) {
         //Remaining quads in workgroup
         gl_PrimitiveCountNV = min(uint(int(meta>>4)-int(gl_WorkGroupID.x<<4))<<1, 32);//2 primatives per quad
+    }
+
+    int sec = abyss_section(lodLvl, lod_y);
+    if ((sec != abyss_section(lodLvl, lod_y + 1)) && ((corner_y - (32 - (32 >> lodLvl))) >= 0)) {
+        per_prim_out[A].abyss_flags |= 1u;
+        per_prim_out[B].abyss_flags |= 1u;
+    } else {
+        per_prim_out[A].abyss_flags = 0;
+        per_prim_out[B].abyss_flags = 0;
     }
 }

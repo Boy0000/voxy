@@ -18,7 +18,8 @@ void main() {
     ivec3 aabbOffset = extractAABBOffset(section);
     ivec3 size = extractAABBSize(section);
 
-    ivec3 bsp = abyss_offset32(baseSectionPos, detail, ipos.y);
+    ivec3 bsp = ivec3(baseSectionPos);
+    bsp.y -= abyss_section(detail, ipos.y);
 
     //Transform ipos with respect to the vertex corner
     ivec3 pos = (((ipos<<detail)-bsp)<<5);

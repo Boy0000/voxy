@@ -28,6 +28,7 @@ taskNV out Task {
     uvec4 binVb;
 
     uint meta;//First 4 bits is lod level, remaining is quadCount
+    int lod_y;
 } task;
 
 
@@ -57,11 +58,13 @@ void main() {
     ivec3 lodPos= extractPosition(meta);
     //Relative position to camera with resepct to lod level to check for visibility bits
 
-    ivec3 bsp = abyss_offset32(baseSectionPos, lodLvl, lodPos.y);
+    ivec3 bsp = ivec3(baseSectionPos);
+    bsp.y -= abyss_section(lodLvl, lodPos.y);
 
     ivec3 cpos = lodPos-(bsp>>lodLvl);
     //Relative position to camera
 
+    task.lod_y = int(lodPos.y);
     task.origin = vec3(((lodPos<<lodLvl)-bsp)<<5)-cameraSubPos;
 
     task.baseOffset = extractQuadStart(meta);
