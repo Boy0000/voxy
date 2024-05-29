@@ -242,9 +242,12 @@ void main() {
 
     int sec = abyss_section(lodLvl, lod_y);
     if (
-        (sec != abyss_section(lodLvl, lod_y + 1)) &&
+        ((sec != abyss_section(lodLvl, lod_y + 1)) &&
         ((corner_y - (32 - (32 >> lodLvl))) >= 0) &&
-        !(face>>1 == 0 && corner_y == 0 && ((face & 1u) == 0))
+        !(face>>1 == 0 && corner_y == 0 && ((face & 1u) == 0)))
+        ||
+        ((sec != abyss_section(lodLvl, lod_y - 1)) &&
+        (face>>1 == 0 && corner_y == 0 && ((face & 1u) == 0)))
     ) {
         per_prim_out[A].abyss_flags |= 1u;
         per_prim_out[B].abyss_flags |= 1u;
