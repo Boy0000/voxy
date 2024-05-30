@@ -8,6 +8,7 @@ import me.cortex.voxy.common.world.WorldEngine;
 import me.cortex.voxy.common.world.WorldSection;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.Direction;
+import me.cortex.voxy.client.core.util.AbyssUtil;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -168,22 +169,33 @@ public class RenderTracker {
 
     //Called by the world engine when a section gets dirtied
     public void sectionUpdated(WorldSection section) {
-        if (this.contains(section.key)) {
+        int lvl = section.lvl;
+        int x = section.x;
+        int y = section.y;
+        int z = section.z;
+
+        int section_n = AbyssUtil.getSection(x * 32);
+        x -= section_n * 512;
+        y -= section_n * 16;
+
+        long key = WorldEngine.getWorldSectionId(lvl, x, y, z);
+
+        if (this.contains(key)) {
             //TODO:FIXME: if the section gets updated, that means that its neighbors might need to be updated aswell
             // (due to block occlusion)
 
             //TODO: FIXME: REBUILDING THE ENTIRE NEIGHBORS when probably only the internal layout changed is NOT SMART
-            this.renderGen.clearCache(section.lvl, section.x, section.y, section.z);
-            this.renderGen.clearCache(section.lvl, section.x-1, section.y, section.z);
-            this.renderGen.clearCache(section.lvl, section.x+1, section.y, section.z);
-            this.renderGen.clearCache(section.lvl, section.x, section.y, section.z-1);
-            this.renderGen.clearCache(section.lvl, section.x, section.y, section.z+1);
+            this.renderGen.clearCache(lvl, x, y, z);
+            this.renderGen.clearCache(lvl, x-1, y, z);
+            this.renderGen.clearCache(lvl, x+1, y, z);
+            this.renderGen.clearCache(lvl, x, y, z-1);
+            this.renderGen.clearCache(lvl, x, y, z+1);
             //TODO: replace this:: with a class cached lambda ref (cause doing this:: still does a lambda allocation)
-            this.renderGen.enqueueTask(section.lvl, section.x, section.y, section.z, this::shouldStillBuild);
-            this.renderGen.enqueueTask(section.lvl, section.x-1, section.y, section.z, this::shouldStillBuild);
-            this.renderGen.enqueueTask(section.lvl, section.x+1, section.y, section.z, this::shouldStillBuild);
-            this.renderGen.enqueueTask(section.lvl, section.x, section.y, section.z-1, this::shouldStillBuild);
-            this.renderGen.enqueueTask(section.lvl, section.x, section.y, section.z+1, this::shouldStillBuild);
+            this.renderGen.enqueueTask(lvl, x, y, z, this::shouldStillBuild);
+            this.renderGen.enqueueTask(lvl, x-1, y, z, this::shouldStillBuild);
+            this.renderGen.enqueueTask(lvl, x+1, y, z, this::shouldStillBuild);
+            this.renderGen.enqueueTask(lvl, x, y, z-1, this::shouldStillBuild);
+            this.renderGen.enqueueTask(lvl, x, y, z+1, this::shouldStillBuild);
         }
         //this.renderGen.enqueueTask(section);
     }
