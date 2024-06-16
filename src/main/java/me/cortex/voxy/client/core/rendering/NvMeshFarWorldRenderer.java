@@ -159,6 +159,10 @@ public class NvMeshFarWorldRenderer extends AbstractFarWorldRenderer<NvMeshViewp
         this.translucent.bind();
         this.bindResources(viewport);
 
+        glColorMask(false, false, false, false);
+        glDrawMeshTasksNV(0, this.geometry.getSectionCount());
+
+        glColorMask(true, true, true, true);
         glDrawMeshTasksNV(0, this.geometry.getSectionCount());
 
         glEnable(GL_CULL_FACE);
