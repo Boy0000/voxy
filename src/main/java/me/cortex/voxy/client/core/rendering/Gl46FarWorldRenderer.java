@@ -206,6 +206,9 @@ public class Gl46FarWorldRenderer extends AbstractFarWorldRenderer<Gl46Viewport>
         glColorMask(true, true, true, true);
         glMultiDrawElementsIndirectCountARB(GL_TRIANGLES, GL_UNSIGNED_SHORT, 400_000 * 4 * 5, 4, this.geometry.getSectionCount(), 0);
 
+        glClearDepth(1);
+        glClear(GL_DEPTH_BUFFER_BIT);
+
         glEnable(GL_CULL_FACE);
         glBindVertexArray(0);
 
