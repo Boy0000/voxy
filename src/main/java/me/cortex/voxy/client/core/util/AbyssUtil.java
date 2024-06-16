@@ -51,6 +51,13 @@ public class AbyssUtil {
         return new Coords(_x, _y);
     }
 
+    public static Coords toAbyssNotOverlapped(double x, double y) {
+        int section = getSection(x);
+        double _x = abyss_dx * ((x / abyss_dx + 0.5) % 1 - 0.5);
+        double _y = y - section * abyss_wh;
+        return new Coords(_x, _y);
+    }
+
     private static boolean belongsToAbyssSection(int s, int y) {
         if (s == 0 && y > 0) return true;
         int min_y = abyss_wy - s * abyss_dy;

@@ -138,17 +138,21 @@ public class VoxelCore {
         int y = camera.getBlockPos().getY();
         int z = camera.getBlockPos().getZ();
 
-        Coords abyssCoords = AbyssUtil.toAbyss(x, y);
-        x = (int)abyssCoords.x;
-        y = (int)abyssCoords.y;
+        Coords abyssCoords = AbyssUtil.toAbyssNotOverlapped(x, y);  // for distance tracker only
+        int ax = (int)abyssCoords.x;
+        int ay = (int)abyssCoords.y;
 
         if (this.firstTime) {
-            this.distanceTracker.init(x, y, z);
+            this.distanceTracker.init(ax, ay, z);
             this.firstTime = false;
-            //this.renderTracker.addLvl0(0,6,0);
         }
-        this.distanceTracker.setCenter(x, y, z);
-        this.renderer.setupRender(frustum, x, y, z);
+        this.distanceTracker.setCenter(ax, ay, z);
+
+        abyssCoords = AbyssUtil.toAbyss(x, y);
+        ax = (int)abyssCoords.x;
+        ay = (int)abyssCoords.y;
+
+        this.renderer.setupRender(frustum, ax, ay, z);
     }
 
     private static Matrix4f makeProjectionMatrix(float near, float far) {
