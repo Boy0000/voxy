@@ -156,13 +156,14 @@ void main() {
     int sec = abyss_section(lodLevel, lod_y);
     fpos.y += 32 * sec;
 
+    int corner_y_offseted = corner_y - (32 - (32 >> lodLevel));
     if (
         ((sec != abyss_section(lodLevel, lod_y + 1)) &&
-        ((corner_y - (32 - (32 >> lodLevel))) >= 0) &&
-        !(face>>1 == 0 && corner_y == 0 && ((face & 1u) == 0)))  // keep bottom face of discarded lod
+        (corner_y_offseted >= 0) &&
+        !(face >> 1 == 0 && corner_y_offseted == 0 && ((face & 1u) == 0)))  // keep bottom face of discarded lod
         ||
         ((sec != abyss_section(lodLevel, lod_y - 1)) &&
-        (face>>1 == 0 && corner_y == 0 && ((face & 1u) == 0)))  // discard bottom face of upper lod
+        (face >> 1 == 0 && corner_y_offseted == 0 && ((face & 1u) == 0)))  // discard bottom face of upper lod
     ) {
         abyss_flags |= 1u;  // discard
     } else {
