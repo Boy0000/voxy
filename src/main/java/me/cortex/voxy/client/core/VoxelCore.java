@@ -162,7 +162,7 @@ public class VoxelCore {
         var client = MinecraftClient.getInstance();
         var gameRenderer = client.gameRenderer;
 
-        float fov = (float) gameRenderer.getFov(gameRenderer.getCamera(), client.getTickDelta(), true);
+        float fov = (float) gameRenderer.getFov(gameRenderer.getCamera(), client.getRenderTime(), true);
 
         projection.setPerspective(fov * 0.01745329238474369f,
                 (float) client.getWindow().getFramebufferWidth() / (float)client.getWindow().getFramebufferHeight(),

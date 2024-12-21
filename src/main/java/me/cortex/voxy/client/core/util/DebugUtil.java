@@ -28,40 +28,40 @@ public class DebugUtil {
         //RenderSystem.depthMask(false);
 
         var tessellator = RenderSystem.renderThreadTesselator();
-        var builder = tessellator.getBuffer();
-        builder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
+        var builder = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
 
-        builder.vertex(positionMatrix, (float) aabb.minX, (float) aabb.minY, (float) aabb.minZ).next();
-        builder.vertex(positionMatrix, (float) aabb.maxX, (float) aabb.minY, (float) aabb.minZ).next();
-        builder.vertex(positionMatrix, (float) aabb.maxX, (float) aabb.minY, (float) aabb.maxZ).next();
-        builder.vertex(positionMatrix, (float) aabb.minX, (float) aabb.minY, (float) aabb.maxZ).next();
+        builder.vertex(positionMatrix, (float) aabb.minX, (float) aabb.minY, (float) aabb.minZ);
+        builder.vertex(positionMatrix, (float) aabb.maxX, (float) aabb.minY, (float) aabb.minZ);
+        builder.vertex(positionMatrix, (float) aabb.maxX, (float) aabb.minY, (float) aabb.maxZ);
+        builder.vertex(positionMatrix, (float) aabb.minX, (float) aabb.minY, (float) aabb.maxZ);
 
-        builder.vertex(positionMatrix, (float) aabb.minX, (float) aabb.maxY, (float) aabb.minZ).next();
-        builder.vertex(positionMatrix, (float) aabb.maxX, (float) aabb.maxY, (float) aabb.minZ).next();
-        builder.vertex(positionMatrix, (float) aabb.maxX, (float) aabb.maxY, (float) aabb.maxZ).next();
-        builder.vertex(positionMatrix, (float) aabb.minX, (float) aabb.maxY, (float) aabb.maxZ).next();
+        builder.vertex(positionMatrix, (float) aabb.minX, (float) aabb.maxY, (float) aabb.minZ);
+        builder.vertex(positionMatrix, (float) aabb.maxX, (float) aabb.maxY, (float) aabb.minZ);
+        builder.vertex(positionMatrix, (float) aabb.maxX, (float) aabb.maxY, (float) aabb.maxZ);
+        builder.vertex(positionMatrix, (float) aabb.minX, (float) aabb.maxY, (float) aabb.maxZ);
 
-        builder.vertex(positionMatrix, (float) aabb.minX, (float) aabb.minY, (float) aabb.minZ).next();
-        builder.vertex(positionMatrix, (float) aabb.maxX, (float) aabb.minY, (float) aabb.minZ).next();
-        builder.vertex(positionMatrix, (float) aabb.maxX, (float) aabb.maxY, (float) aabb.minZ).next();
-        builder.vertex(positionMatrix, (float) aabb.minX, (float) aabb.maxY, (float) aabb.minZ).next();
+        builder.vertex(positionMatrix, (float) aabb.minX, (float) aabb.minY, (float) aabb.minZ);
+        builder.vertex(positionMatrix, (float) aabb.maxX, (float) aabb.minY, (float) aabb.minZ);
+        builder.vertex(positionMatrix, (float) aabb.maxX, (float) aabb.maxY, (float) aabb.minZ);
+        builder.vertex(positionMatrix, (float) aabb.minX, (float) aabb.maxY, (float) aabb.minZ);
 
-        builder.vertex(positionMatrix, (float) aabb.minX, (float) aabb.minY, (float) aabb.maxZ).next();
-        builder.vertex(positionMatrix, (float) aabb.maxX, (float) aabb.minY, (float) aabb.maxZ).next();
-        builder.vertex(positionMatrix, (float) aabb.maxX, (float) aabb.maxY, (float) aabb.maxZ).next();
-        builder.vertex(positionMatrix, (float) aabb.minX, (float) aabb.maxY, (float) aabb.maxZ).next();
+        builder.vertex(positionMatrix, (float) aabb.minX, (float) aabb.minY, (float) aabb.maxZ);
+        builder.vertex(positionMatrix, (float) aabb.maxX, (float) aabb.minY, (float) aabb.maxZ);
+        builder.vertex(positionMatrix, (float) aabb.maxX, (float) aabb.maxY, (float) aabb.maxZ);
+        builder.vertex(positionMatrix, (float) aabb.minX, (float) aabb.maxY, (float) aabb.maxZ);
 
-        builder.vertex(positionMatrix, (float) aabb.minX, (float) aabb.minY, (float) aabb.minZ).next();
-        builder.vertex(positionMatrix, (float) aabb.minX, (float) aabb.maxY, (float) aabb.minZ).next();
-        builder.vertex(positionMatrix, (float) aabb.minX, (float) aabb.maxY, (float) aabb.maxZ).next();
-        builder.vertex(positionMatrix, (float) aabb.minX, (float) aabb.minY, (float) aabb.maxZ).next();
+        builder.vertex(positionMatrix, (float) aabb.minX, (float) aabb.minY, (float) aabb.minZ);
+        builder.vertex(positionMatrix, (float) aabb.minX, (float) aabb.maxY, (float) aabb.minZ);
+        builder.vertex(positionMatrix, (float) aabb.minX, (float) aabb.maxY, (float) aabb.maxZ);
+        builder.vertex(positionMatrix, (float) aabb.minX, (float) aabb.minY, (float) aabb.maxZ);
 
-        builder.vertex(positionMatrix, (float) aabb.maxX, (float) aabb.minY, (float) aabb.minZ).next();
-        builder.vertex(positionMatrix, (float) aabb.maxX, (float) aabb.maxY, (float) aabb.minZ).next();
-        builder.vertex(positionMatrix, (float) aabb.maxX, (float) aabb.maxY, (float) aabb.maxZ).next();
-        builder.vertex(positionMatrix, (float) aabb.maxX, (float) aabb.minY, (float) aabb.maxZ).next();
+        builder.vertex(positionMatrix, (float) aabb.maxX, (float) aabb.minY, (float) aabb.minZ);
+        builder.vertex(positionMatrix, (float) aabb.maxX, (float) aabb.maxY, (float) aabb.minZ);
+        builder.vertex(positionMatrix, (float) aabb.maxX, (float) aabb.maxY, (float) aabb.maxZ);
+        builder.vertex(positionMatrix, (float) aabb.maxX, (float) aabb.minY, (float) aabb.maxZ);
 
-        tessellator.draw();
+        tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
+        tessellator.clear();
 
         RenderSystem.disableBlend();
         RenderSystem.enableCull();

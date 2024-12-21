@@ -30,10 +30,10 @@ public class BakedBlockEntityModel {
         }
 
         @Override
-        public VertexConsumer vertex(double x, double y, double z) {
-            this.cX = (float) x;
-            this.cY = (float) y;
-            this.cZ = (float) z;
+        public VertexConsumer vertex(float x, float y, float z) {
+            this.cX = x;
+            this.cY = y;
+            this.cZ = z;
             return this;
         }
 
@@ -68,7 +68,7 @@ public class BakedBlockEntityModel {
             return this;
         }
 
-        @Override
+        /*@Override
         public void fixedColor(int red, int green, int blue, int alpha) {
 
         }
@@ -84,14 +84,15 @@ public class BakedBlockEntityModel {
                     Float.floatToIntBits(this.cX), Float.floatToIntBits(this.cY), Float.floatToIntBits(this.cZ),
                     this.cR, this.cG, this.cB, this.cA,
                     Float.floatToIntBits(this.cU), Float.floatToIntBits(this.cV)});
-        }
+        }*/
 
         public void putInto(VertexConsumer vc) {
             for (var vert : this.vertices) {
                 vc.vertex(Float.intBitsToFloat(vert[0]), Float.intBitsToFloat(vert[1]), Float.intBitsToFloat(vert[2]))
                         .color(vert[3], vert[4], vert[5], vert[6])
                         .texture(Float.intBitsToFloat(vert[7]), Float.intBitsToFloat(vert[8]))
-                        .next();
+                        ;
+                        //.next();
             }
         }
     }
@@ -102,9 +103,8 @@ public class BakedBlockEntityModel {
     }
 
     public void renderOut() {
-        var vc = Tessellator.getInstance().getBuffer();
         for (var layer : this.layers) {
-            vc.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR_TEXTURE);
+            var vc = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
             if (layer.layer instanceof RenderLayer.MultiPhase mp) {
                 Identifier textureId = mp.phases.texture.getId().orElse(null);
                 if (textureId == null) {
@@ -114,8 +114,13 @@ public class BakedBlockEntityModel {
                     glBindTexture(GL_TEXTURE_2D, texture.getGlId());
                 }
             }
-            layer.putInto(vc);
-            BufferRenderer.draw(vc.end());
+           layer.putInto(vc);
+            try {
+                //System.err.println("REPLACE THE UPLOADING WITH THREAD SAFE VARIENT");
+                BufferRenderer.draw(vc.end());
+            } catch (IllegalStateException e) {
+                //System.err.println("Got empty buffer builder! for block " + state);
+            }
         }
     }
 
