@@ -99,7 +99,7 @@ bool isCulledByHiz() {
         printf("HiZ sample point culled: (%f,%f)@%f against %f", midpoint.x, midpoint.y, miplevel, minBB.z);
     }
 
-    return culled;
+    return false;
 }
 
 //Returns if we should decend into its children or not

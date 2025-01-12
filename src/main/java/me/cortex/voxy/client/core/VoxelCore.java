@@ -130,7 +130,7 @@ public class VoxelCore {
 
 
         //Do some very cheeky stuff for MiB
-        if (false) {
+        if (true) {
             int sector = (((int)Math.floor(cameraX)>>4)+512)>>10;
             cameraX -= sector<<14;//10+4
             cameraY += (16+(256-32-sector*30))*16;

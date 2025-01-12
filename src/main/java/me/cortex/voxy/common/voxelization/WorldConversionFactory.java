@@ -135,7 +135,7 @@ public class WorldConversionFactory {
 
 
         //Do some very cheeky stuff for MiB
-        if (false) {
+        if (true) {
             int sector = (section.x+512)>>10;
             section.setPosition(section.x-(sector<<10), section.y+16+(256-32-sector*30), section.z);//Note sector size mult is 30 because the top chunk is replicated (and so is bottom chunk)
         }

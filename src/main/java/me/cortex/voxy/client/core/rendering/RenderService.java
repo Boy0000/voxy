@@ -92,7 +92,7 @@ public class RenderService<T extends AbstractSectionRenderer<J, ?>, J extends Vi
                 }
             }
         }*/
-        if (true) {
+        if (false) {
             if (true) {
                 if (true) {
                     return;
@@ -147,7 +147,7 @@ public class RenderService<T extends AbstractSectionRenderer<J, ?>, J extends Vi
     private int q = -128;
     public void setup(Camera camera) {
         for (int i = 0; i<32 && q<(151*151*2)&&q++>=0;i++) {
-            this.nodeManager.insertTopLevelNode(WorldEngine.getWorldSectionId(4, (q%151)-75, ((q/151)/151)-1, ((q/151)%151)-75));
+            //this.nodeManager.insertTopLevelNode(WorldEngine.getWorldSectionId(4, (q%151)-75, ((q/151)/151)-1, ((q/151)%151)-75));
         }
         this.modelService.tick();
     }
