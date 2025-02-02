@@ -2,6 +2,7 @@ package me.cortex.voxy.client.core.model;
 
 import com.mojang.blaze3d.platform.GlConst;
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.ProjectionType;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.systems.VertexSorter;
 import me.cortex.voxy.client.core.gl.GlFramebuffer;
@@ -126,7 +127,7 @@ public class ModelTextureBakery {
                 0, 2,0,0,
                 0,0, -1f,0,
                 -1,-1,0,1,
-        }), VertexSorter.BY_Z);
+        }), ProjectionType.ORTHOGRAPHIC);
 
 
 
@@ -184,7 +185,7 @@ public class ModelTextureBakery {
         glDisable(GL_STENCIL_TEST);
         glDisable(GL_BLEND);
 
-        RenderSystem.setProjectionMatrix(oldProjection, VertexSorter.BY_DISTANCE);
+        RenderSystem.setProjectionMatrix(oldProjection, ProjectionType.PERSPECTIVE);
         glBindFramebuffer(GL_FRAMEBUFFER, oldFB);
         GL11C.glViewport(GlStateManager.Viewport.getX(), GlStateManager.Viewport.getY(), GlStateManager.Viewport.getWidth(), GlStateManager.Viewport.getHeight());
 
@@ -300,7 +301,7 @@ public class ModelTextureBakery {
             var quads = model.getQuads(state, direction, new LocalRandom(randomValue));
             for (var quad : quads) {
                 //TODO: mark pixels that have
-                int meta = quad.hasColor()?1:0;
+                int meta = quad.hasTint()?1:0;
                 builder.quad(stack.peek(), quad, 255f/((meta>>16)&0xff), 255f/((meta>>8)&0xff), 255f/(meta&0xff), 1.0f, 0, 0);
             }
         }

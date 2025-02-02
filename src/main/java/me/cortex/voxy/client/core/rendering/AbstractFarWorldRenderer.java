@@ -14,6 +14,7 @@ import me.cortex.voxy.common.world.other.Mapper;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
+import net.minecraft.client.render.Fog;
 import net.minecraft.client.render.Frustum;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.registry.RegistryKeys;
@@ -30,6 +31,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 import static org.lwjgl.opengl.ARBMultiDrawIndirect.glMultiDrawElementsIndirect;
 import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL33.glGenSamplers;
 
 //can make it so that register the key of the sections we have rendered, then when a section changes and is registered,
 // dispatch an update to the render section data builder which then gets consumed by the render system and updates
@@ -46,7 +48,8 @@ public abstract class AbstractFarWorldRenderer <T extends Viewport, J extends Ab
     protected final GlBuffer uniformBuffer;
     protected final J geometry;
     protected final ModelManager models;
-    protected final GlBuffer lightDataBuffer;
+    //protected final GlBuffer lightDataBuffer;
+    private static final int SAMPLER = glGenSamplers();
 
     protected final int maxSections;
 
@@ -66,9 +69,13 @@ public abstract class AbstractFarWorldRenderer <T extends Viewport, J extends Ab
     public AbstractFarWorldRenderer(J geometry) {
         this.maxSections = geometry.getMaxSections();
         this.uniformBuffer  = new GlBuffer(1024);
-        this.lightDataBuffer  = new GlBuffer(256*4);//256 of uint
+        //this.lightDataBuffer  = new GlBuffer(256*4);//256 of uint
         this.geometry = geometry;
         this.models = new ModelManager(16);
+    }
+
+    static {
+        //SAMPLER
     }
 
     public void setupRender(Frustum frustum, int cx, int cy, int cz) {
@@ -85,17 +92,17 @@ public abstract class AbstractFarWorldRenderer <T extends Viewport, J extends Ab
         DownloadStream.INSTANCE.tick();
 
         //Update the lightmap
-        {
-            long upload = UploadStream.INSTANCE.upload(this.lightDataBuffer, 0, 256*4);
-            var lmt = MinecraftClient.getInstance().gameRenderer.getLightmapTextureManager().texture.getImage();
-            for (int light = 0; light < 256; light++) {
-                int x = light&0xF;
-                int y = ((light>>4)&0xF);
-                int sample = lmt.getColor(x,y);
-                sample = ((sample&0xFF0000)>>16)|(sample&0xFF00)|((sample&0xFF)<<16);
-                MemoryUtil.memPutInt(upload + (((x<<4)|(15-y))*4), sample|(0xFF<<28));//Skylight is inverted
-            }
-        }
+//        {
+//            long upload = UploadStream.INSTANCE.upload(this.lightDataBuffer, 0, 256*4);
+//            var lmt = MinecraftClient.getInstance().gameRenderer.getLightmapTextureManager().texture.getImage();
+//            for (int light = 0; light < 256; light++) {
+//                int x = light&0xF;
+//                int y = ((light>>4)&0xF);
+//                int sample = lmt.getColor(x,y);
+//                sample = ((sample&0xFF0000)>>16)|(sample&0xFF00)|((sample&0xFF)<<16);
+//                MemoryUtil.memPutInt(upload + (((x<<4)|(15-y))*4), sample|(0xFF<<28));//Skylight is inverted
+//            }
+//        }
 
         //Upload any new geometry
         this.updatedSectionIds = this.geometry.uploadResults();
@@ -105,7 +112,7 @@ public abstract class AbstractFarWorldRenderer <T extends Viewport, J extends Ab
             //Do any BiomeChanges
             while (!this.biomeUpdates.isEmpty()) {
                 var update = this.biomeUpdates.pop();
-                var biomeReg = MinecraftClient.getInstance().world.getRegistryManager().get(RegistryKeys.BIOME);
+                var biomeReg = MinecraftClient.getInstance().world.getRegistryManager().getOrThrow(RegistryKeys.BIOME);
                 this.models.addBiome(update.id, biomeReg.get(Identifier.of(update.biome)));
                 didHaveBiomeChange = true;
             }
@@ -126,8 +133,7 @@ public abstract class AbstractFarWorldRenderer <T extends Viewport, J extends Ab
 
         //TODO: fix this in a better way than this ungodly hacky stuff, causes clouds to dissapear
         //RenderSystem.setShaderFogColor(1f, 1f, 1f, 0f);
-        RenderSystem.setShaderFogEnd(99999999);
-        RenderSystem.setShaderFogStart(9999999);
+        RenderSystem.setShaderFog(Fog.DUMMY);
     }
 
     public abstract void renderFarAwayOpaque(T viewport);
@@ -156,7 +162,7 @@ public abstract class AbstractFarWorldRenderer <T extends Viewport, J extends Ab
         this.models.free();
         this.geometry.free();
         this.uniformBuffer.free();
-        this.lightDataBuffer.free();
+        //this.lightDataBuffer.free();
     }
 
     public ModelManager getModelManager() {

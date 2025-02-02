@@ -96,7 +96,7 @@ public class Gl46MeshletsFarWorldRenderer extends AbstractFarWorldRenderer<Gl46M
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, viewport.visibilityBuffer.id);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, this.models.getBufferId());
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, this.models.getColourBufferId());
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 8, this.lightDataBuffer.id);//Lighting LUT
+        glBindTextureUnit(1, MinecraftClient.getInstance().gameRenderer.getLightmapTextureManager().lightmapFramebuffer.getColorAttachment());//Lighting LUT
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, bindToDrawIndirect?this.glDrawIndirect.id:0);
         glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, bindToDispatchIndirect?this.glDrawIndirect.id:0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, SharedIndexBuffer.INSTANCE_BYTE.id());
@@ -150,7 +150,7 @@ public class Gl46MeshletsFarWorldRenderer extends AbstractFarWorldRenderer<Gl46M
 
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
-        RenderLayer.getCutoutMipped().startDrawing();
+        //RenderLayer.getCutoutMipped().startDrawing();
 
         this.updateUniformBuffer(viewport);
         UploadStream.INSTANCE.commit();
@@ -195,7 +195,9 @@ public class Gl46MeshletsFarWorldRenderer extends AbstractFarWorldRenderer<Gl46M
         glBindVertexArray(0);
         glBindSampler(0, 0);
         glBindTextureUnit(0, 0);
-        RenderLayer.getCutoutMipped().endDrawing();
+        glBindSampler(1, 0);
+        glBindTextureUnit(1, 0);
+        //RenderLayer.getCutoutMipped().endDrawing();
     }
 
 
