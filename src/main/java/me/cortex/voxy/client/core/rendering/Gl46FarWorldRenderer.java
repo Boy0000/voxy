@@ -7,6 +7,7 @@ import me.cortex.voxy.client.core.rendering.util.DownloadStream;
 import me.cortex.voxy.client.core.rendering.util.UploadStream;
 import me.cortex.voxy.client.mixin.joml.AccessFrustumIntersection;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.util.math.MatrixStack;
 import org.joml.Matrix4f;
@@ -70,7 +71,7 @@ public class Gl46FarWorldRenderer extends AbstractFarWorldRenderer<Gl46Viewport,
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, viewport.visibilityBuffer.id);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, this.models.getBufferId());
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, this.models.getColourBufferId());
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 8, this.lightDataBuffer.id);//Lighting LUT
+        glBindTextureUnit(1, MinecraftClient.getInstance().gameRenderer.getLightmapTextureManager().lightmapFramebuffer.getColorAttachment());//Lighting LUT
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, this.glCommandBuffer.id);
         glBindBuffer(GL_PARAMETER_BUFFER_ARB, this.glCommandCountBuffer.id);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, SharedIndexBuffer.INSTANCE.id());
@@ -125,7 +126,7 @@ public class Gl46FarWorldRenderer extends AbstractFarWorldRenderer<Gl46Viewport,
         //this.models.bakery.renderFaces(Blocks.CHEST.getDefaultState(), 1234, false);
 
 
-        RenderLayer.getCutoutMipped().startDrawing();
+        //RenderLayer.getCutoutMipped().startDrawing();
         //RenderSystem.enableBlend();
         //RenderSystem.defaultBlendFunc();
 
@@ -181,7 +182,9 @@ public class Gl46FarWorldRenderer extends AbstractFarWorldRenderer<Gl46Viewport,
         glBindVertexArray(0);
         glBindSampler(0, 0);
         glBindTextureUnit(0, 0);
-        RenderLayer.getCutoutMipped().endDrawing();
+        glBindSampler(1, 0);
+        glBindTextureUnit(1, 0);
+        //RenderLayer.getCutoutMipped().endDrawing();
     }
 
     @Override

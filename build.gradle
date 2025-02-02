@@ -20,14 +20,38 @@ repositories {
     }
     maven { url "https://maven.shedaniel.me/" }
     maven { url "https://maven.terraformersmc.com/releases/" }
-    maven { url = "https://repo.codemc.io/repository/maven-public/" }
 }
 
+
+def gitCommitHash = { ->
+    try {
+        def stdout = new ByteArrayOutputStream()
+        ExecResult result = exec () -> {
+            commandLine 'git', 'rev-parse', '--short', 'HEAD'
+            standardOutput = stdout
+            ignoreExitValue = true
+        }
+
+        if (result.getExitValue() != 0) {
+            return "<UnknownCommit>";
+        } else {
+            return stdout.toString().trim();
+        }
+    } catch (Exception e) {
+        e.printStackTrace()
+        return "<UnknownCommit>";
+    }
+}
+
+def buildtime = {System.currentTimeSeconds()}
 processResources {
-    inputs.property "version", project.version
+    def time = buildtime()
+    def hash = gitCommitHash()
+    inputs.properties("version": project.version, "commit": hash, "buildtime": time)
+
     archivesBaseName = "voxy"
     filesMatching("fabric.mod.json") {
-        expand "version": project.version
+        expand "version": project.version, "commit": hash, "buildtime": time
     }
 }
 
@@ -41,37 +65,42 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
+
     modImplementation(fabricApi.module("fabric-api-base", project.fabric_version))
     modImplementation(fabricApi.module("fabric-rendering-fluids-v1", project.fabric_version))
     modImplementation(fabricApi.module("fabric-resource-loader-v0", project.fabric_version))
     modImplementation(fabricApi.module("fabric-command-api-v2", project.fabric_version))
-    modImplementation("net.fabricmc.fabric-api:fabric-rendering-data-attachment-v1:0.3.38+73761d2e9a")
 
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     //TODO: this is to eventually not need sodium installed as atm its just used for parsing shaders
-    modRuntimeOnly "maven.modrinth:sodium:mc1.21.1-0.6.5-fabric"
-    modCompileOnly "maven.modrinth:sodium:mc1.21.1-0.6.5-fabric"
+    modRuntimeOnly "maven.modrinth:sodium:mc1.21.4-0.6.6-fabric"
+    modCompileOnly "maven.modrinth:sodium:mc1.21.4-0.6.6-fabric"
 
     //modRuntimeOnly "maven.modrinth:nvidium:0.2.6-beta"
     modCompileOnly "maven.modrinth:nvidium:0.2.8-beta"
 
-    modImplementation("maven.modrinth:cloth-config:15.0.140+fabric")
-    modImplementation("maven.modrinth:modmenu:11.0.3")
-    modCompileOnly("maven.modrinth:iris:1.8.1+1.21.1-fabric")
-    //modRuntimeOnly("maven.modrinth:iris:1.6.17+1.20.4")
-    modCompileOnly("maven.modrinth:starlight:1.1.3+1.20.4")
+    modImplementation("maven.modrinth:cloth-config:17.0.144+fabric")
+
+    modImplementation("maven.modrinth:modmenu:13.0.0")
+
+    modCompileOnly("maven.modrinth:iris:1.8.5+1.21.4-fabric")
+
+    //modCompileOnly("maven.modrinth:starlight:1.1.3+1.20.4")
+
     //modCompileOnly("maven.modrinth:immersiveportals:v5.1.7-mc1.20.4")
-    modCompileOnly("maven.modrinth:vivecraft:1.20.4-1.1.6-fabric")
+
 
     modCompileOnly("maven.modrinth:chunky:1.4.27-fabric")
     modRuntimeOnly("maven.modrinth:chunky:1.4.27-fabric")
 
-    modRuntimeOnly("maven.modrinth:spark:1.10.73-fabric")
-    modRuntimeOnly("maven.modrinth:fabric-permissions-api:0.3.1")
+    modRuntimeOnly("maven.modrinth:spark:1.10.121-fabric")
+    modRuntimeOnly("maven.modrinth:fabric-permissions-api:0.3.3")
     //modRuntimeOnly("maven.modrinth:nsight-loader:1.2.0")
 
-    modImplementation('io.github.douira:glsl-transformer:2.0.1')
+    //modImplementation('io.github.douira:glsl-transformer:2.0.1')
+
+    modCompileOnly("maven.modrinth:vivecraft:1.21.1-1.1.14-b2-fabric")
 }
 
 
@@ -105,32 +134,7 @@ jar {
     }
 }
 
-project.ext.lwjglVersion = "3.3.3"
-project.ext.lwjglNatives = "natives-windows"
 
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
-
-    implementation "org.lwjgl:lwjgl"
-    include(implementation "org.lwjgl:lwjgl-lmdb")
-    include(implementation "org.lwjgl:lwjgl-zstd")
-    runtimeOnly "org.lwjgl:lwjgl:$lwjglVersion:natives-windows"
-    runtimeOnly "org.lwjgl:lwjgl:$lwjglVersion:natives-linux"
-    include(runtimeOnly "org.lwjgl:lwjgl-lmdb:$lwjglVersion:natives-windows")
-    include(runtimeOnly "org.lwjgl:lwjgl-zstd:$lwjglVersion:natives-windows")
-    include(runtimeOnly "org.lwjgl:lwjgl-lmdb:$lwjglVersion:natives-linux")
-    include(runtimeOnly "org.lwjgl:lwjgl-zstd:$lwjglVersion:natives-linux")
-
-    include(implementation 'org.rocksdb:rocksdbjni:8.10.0')
-    include(implementation 'redis.clients:jedis:5.1.0')
-    include(implementation 'org.apache.commons:commons-pool2:2.12.0')
-    //implementation 'org.rocksdb:rocksdbjni:8.10.0'
-    //implementation 'redis.clients:jedis:5.1.0'
-}
 
 tasks.register('excludeUnused', Zip) {
     //outputs.upToDateWhen { false }
@@ -167,5 +171,48 @@ if (!processIncludeJars.outputDirectory.asFileTree.filter {
             !it.name.startsWith('rocksdb')
         }
         nestedJars.from excludeUnused
+    }
+}
+
+
+project.ext.lwjglVersion = "3.3.3"
+project.ext.lwjglNatives = "natives-windows"
+
+repositories {
+    mavenCentral()
+}
+
+
+dependencies {
+    implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
+
+    implementation "org.lwjgl:lwjgl"
+    include(implementation "org.lwjgl:lwjgl-lmdb")
+    include(implementation "org.lwjgl:lwjgl-zstd")
+    runtimeOnly "org.lwjgl:lwjgl:$lwjglVersion:natives-windows"
+    runtimeOnly "org.lwjgl:lwjgl:$lwjglVersion:natives-linux"
+    include(runtimeOnly "org.lwjgl:lwjgl-lmdb:$lwjglVersion:natives-windows")
+    include(runtimeOnly "org.lwjgl:lwjgl-zstd:$lwjglVersion:natives-windows")
+    include(runtimeOnly "org.lwjgl:lwjgl-lmdb:$lwjglVersion:natives-linux")
+    include(runtimeOnly "org.lwjgl:lwjgl-zstd:$lwjglVersion:natives-linux")
+
+    include(implementation 'redis.clients:jedis:5.1.0')
+    include(implementation('org.rocksdb:rocksdbjni:8.10.0'))
+    include(implementation 'org.apache.commons:commons-pool2:2.12.0')
+    compileOnly('org.tukaani:xz:1.10')
+    include(implementation 'org.lz4:lz4-java:1.8.0')
+    //implementation 'org.rocksdb:rocksdbjni:8.10.0'
+    //implementation 'redis.clients:jedis:5.1.0'
+}
+
+repositories {
+    maven {
+        url = "https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1"
+    }
+}
+
+dependencies {
+    modRuntimeOnly('me.djtheredstoner:DevAuth-fabric:1.1.0') {
+        exclude group: 'net.fabricmc', module: 'fabric-loader'
     }
 }

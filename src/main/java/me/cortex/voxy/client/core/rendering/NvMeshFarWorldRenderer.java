@@ -4,6 +4,7 @@ import me.cortex.voxy.client.core.gl.shader.Shader;
 import me.cortex.voxy.client.core.gl.shader.ShaderType;
 import me.cortex.voxy.client.core.rendering.util.UploadStream;
 import me.cortex.voxy.client.mixin.joml.AccessFrustumIntersection;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.Frustum;
 import net.minecraft.client.render.RenderLayer;
@@ -79,7 +80,7 @@ public class NvMeshFarWorldRenderer extends AbstractFarWorldRenderer<NvMeshViewp
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, viewport.visibilityBuffer.id);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, this.models.getBufferId());
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, this.models.getColourBufferId());
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, this.lightDataBuffer.id);//Lighting LUT
+        glBindTextureUnit(1, MinecraftClient.getInstance().gameRenderer.getLightmapTextureManager().lightmapFramebuffer.getColorAttachment());//Lighting LUT
 
         //Bind the texture atlas
         glBindSampler(0, this.models.getSamplerId());
@@ -111,7 +112,7 @@ public class NvMeshFarWorldRenderer extends AbstractFarWorldRenderer<NvMeshViewp
 
         this.terrain.bind();
 
-        RenderLayer.getCutoutMipped().startDrawing();
+        //RenderLayer.getCutoutMipped().startDrawing();
 
         glBindVertexArray(AbstractFarWorldRenderer.STATIC_VAO);
         this.bindResources(viewport);
@@ -135,7 +136,9 @@ public class NvMeshFarWorldRenderer extends AbstractFarWorldRenderer<NvMeshViewp
         glBindVertexArray(0);
         glBindSampler(0, 0);
         glBindTextureUnit(0, 0);
-        RenderLayer.getCutoutMipped().endDrawing();
+        glBindSampler(1, 0);
+        glBindTextureUnit(1, 0);
+        //RenderLayer.getCutoutMipped().endDrawing();
     }
 
     @Override
