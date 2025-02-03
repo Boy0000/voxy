@@ -110,7 +110,12 @@ public class BakedBlockEntityModel {
                 }
             }
             layer.putInto(bb);
-            BufferRenderer.draw(bb.end());
+            try {
+                //System.err.println("REPLACE THE UPLOADING WITH THREAD SAFE VARIENT");
+                BufferRenderer.draw(bb.end());
+            } catch (IllegalStateException e) {
+                //System.err.println("Got empty buffer builder! for block " + state);
+            }
         }
     }
 
