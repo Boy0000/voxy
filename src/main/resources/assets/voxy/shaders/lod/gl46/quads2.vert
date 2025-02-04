@@ -15,10 +15,7 @@ layout(location = 2) out flat vec4 tinting;
 layout(location = 3) out flat vec4 addin;
 layout(location = 4) out flat uint flags;
 layout(location = 5) out flat vec4 conditionalTinting;
-
-#ifdef DEBUG_RENDER
 layout(location = 6) out flat uint abyss_flags;
-#endif
 
 uint extractLodLevel() {
     return uint(gl_BaseInstance)>>27;
