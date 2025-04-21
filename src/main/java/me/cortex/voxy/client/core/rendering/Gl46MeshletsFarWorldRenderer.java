@@ -96,7 +96,7 @@ public class Gl46MeshletsFarWorldRenderer extends AbstractFarWorldRenderer<Gl46M
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, viewport.visibilityBuffer.id);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, this.models.getBufferId());
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 7, this.models.getColourBufferId());
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 8, this.lightDataBuffer.id);//Lighting LUT
+        glBindTextureUnit(3, MinecraftClient.getInstance().gameRenderer.getLightmapTextureManager().lightmapFramebuffer.getColorAttachment());
         glBindBuffer(GL_DRAW_INDIRECT_BUFFER, bindToDrawIndirect?this.glDrawIndirect.id:0);
         glBindBuffer(GL_DISPATCH_INDIRECT_BUFFER, bindToDispatchIndirect?this.glDrawIndirect.id:0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, SharedIndexBuffer.INSTANCE_BYTE.id());

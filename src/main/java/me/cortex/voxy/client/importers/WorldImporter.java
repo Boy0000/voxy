@@ -11,6 +11,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.nbt.*;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.collection.IndexedIterable;
@@ -50,8 +52,8 @@ public class WorldImporter {
     public WorldImporter(WorldEngine worldEngine, World mcWorld) {
         this.world = worldEngine;
 
-        var biomeRegistry = mcWorld.getRegistryManager().get(RegistryKeys.BIOME);
-        var defaultBiome = biomeRegistry.entryOf(BiomeKeys.PLAINS);
+        var biomeRegistry = mcWorld.getRegistryManager().getOptional(RegistryKeys.BIOME).get();
+        var defaultBiome = biomeRegistry.getEntry(biomeRegistry.get(BiomeKeys.PLAINS));
         this.defaultBiomeProvider = new ReadableContainer<RegistryEntry<Biome>>() {
             @Override
             public RegistryEntry<Biome> get(int x, int y, int z) {
@@ -84,6 +86,11 @@ public class WorldImporter {
             }
 
             @Override
+            public PalettedContainer<RegistryEntry<Biome>> copy() {
+                return null;
+            }
+
+            @Override
             public PalettedContainer<RegistryEntry<Biome>> slice() {
                 return null;
             }
@@ -95,7 +102,7 @@ public class WorldImporter {
         };
 
         this.biomeCodec = PalettedContainer.createReadableContainerCodec(
-                biomeRegistry.getIndexedEntries(), biomeRegistry.getEntryCodec(), PalettedContainer.PaletteProvider.BIOME, biomeRegistry.entryOf(BiomeKeys.PLAINS)
+                biomeRegistry.getIndexedEntries(), biomeRegistry.getEntryCodec(), PalettedContainer.PaletteProvider.BIOME, biomeRegistry.getEntry(biomeRegistry.get(BiomeKeys.PLAINS))
         );
     }
 
