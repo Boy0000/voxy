@@ -61,4 +61,3 @@ vec4 getLighting(uint index) {
     arr = arr & uvec4(0xFF);
     return vec4(arr)*vec4(1.0f/255.0f);
 }
-
