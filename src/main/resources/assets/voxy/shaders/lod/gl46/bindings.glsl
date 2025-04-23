@@ -84,7 +84,9 @@ layout(binding = 8, std430) readonly restrict buffer LightingBuffer {
 
 vec4 getLighting(uint index) {
     int i2 = int(index);
-    return texture(lightSampler, vec2((i2>>4)&0xF, i2&0xF)/16.0f);
+    vec2 uv = vec2(float((i2 >> 4) & 0xF) + 0.5, float(15 - (i2 & 0xF)) + 0.5) / 16.0f;
+    vec4 light = texture(lightSampler, uv);
+    return light;
 }
 
 

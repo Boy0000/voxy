@@ -87,19 +87,28 @@ public abstract class AbstractFarWorldRenderer <T extends Viewport, J extends Ab
         DownloadStream.INSTANCE.tick();
 
         //Update the lightmap
-//        {
-//            long upload = UploadStream.INSTANCE.upload(this.lightDataBuffer, 0, 256*4);
-//            var lmt = MinecraftClient.getInstance().gameRenderer.getOverlayTexture().texture.getImage();
-//            //var lmt2 = MinecraftClient.getInstance().gameRenderer
-//            for (int light = 0; light < 256; light++) {
-//                int x = light&0xF;
-//                int y = ((light>>4)&0xF);
-//                //lmt2
-//                int sample = lmt.getColor(x,y);
-//                sample = ((sample&0xFF0000)>>16)|(sample&0xFF00)|((sample&0xFF)<<16);
-//                MemoryUtil.memPutInt(upload + (((x<<4)|(15-y))*4), sample|(0xFF<<28));//Skylight is inverted
-//            }
-//        }
+        {
+            long upload = UploadStream.INSTANCE.upload(this.lightDataBuffer, 0, 256 * 4);
+
+            var lmt = MinecraftClient.getInstance().gameRenderer.getLightmapTextureManager();
+
+            for (int light = 0; light < 256; light++) {
+                int x = light & 0xF;
+                int y = (light >> 4) & 0xF;
+            
+                int blockLight = x;
+                int skyLight = 15 - y;
+
+                int packedLight = lmt.pack(blockLight, skyLight);
+            
+                float brightness = lmt.getBrightness(1f, packedLight);
+            
+                int grayscale = (int)(brightness * 255.0f) & 0xFF; // :sob:
+                int sample = (0xFF << 24) | (grayscale << 16) | (grayscale << 8) | (grayscale);
+            
+                MemoryUtil.memPutInt(upload + (((x << 4) | (15 - y)) * 4), sample);
+            }
+        }
 
         //Upload any new geometry
         this.updatedSectionIds = this.geometry.uploadResults();
@@ -131,7 +140,7 @@ public abstract class AbstractFarWorldRenderer <T extends Viewport, J extends Ab
         //TODO: fix this in a better way than this ungodly hacky stuff, causes clouds to dissapear
         RenderSystem.setShaderFog(new Fog(9999999,99999999,SPHERE,1f,1f,1f,0f));
     }
-
+    
     public abstract void renderFarAwayOpaque(T viewport);
 
     public abstract void renderFarAwayTranslucent(T viewport);
